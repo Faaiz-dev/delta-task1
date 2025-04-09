@@ -14,6 +14,23 @@
         width: 100vw;
         height: 100vh;
     }
+    .timers{
+      display: flex;
+    }
+    .status-bar {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: start;
+      gap: 40px;
+      padding: 10px 20px;
+      border-radius: 12px;
+    }
+   
+    
     .h1{
         position: absolute;
         top: 50%;
@@ -46,24 +63,62 @@
 </style>
 </head>
 <body>
-    <div class="displayPlayerMove"></div>
-<div class="hex-container" id="hex" >
     
-</div>
-<div class="display-score"></div>
+    <div class="hex-container" id="hex" >
+      <div class="status-bar">
+        <div class="timers">
+          <div class="red-timer">Red: 10:00</div>
+          <div class="blue-timer">Blue: 10:00</div>
+        </div>
+        <div class="displayPlayerMove"></div>
+        <div class="display-score"></div>
+      </div>
+    </div>
+   
 
 <script>
     const score = {
         Red: 0,
         Blue: 0
     };
-    
+
+    let redTime = 600;
+    let blueTime = 600;
+    let intervalId = null;
     let currentMove = "red";
+
     function renderScore(){
-        document.querySelector(".display-score").innerHTML = `<p>Red: ${score.Red}</p><p>Blue: ${score.Blue}</p>`;
+        document.querySelector(".display-score").innerHTML = `Red: ${score.Red}  Blue: ${score.Blue}</p>`;
         document.querySelector(".displayPlayerMove").innerHTML = `${currentMove} to play`
     }
     renderScore();
+
+    function updateTimer(currentMove,time){
+      const mins = Math.floor(time/60);
+      const secs = Math.floor(time%60);
+      document.querySelector(`.${currentMove}-timer`).innerHTML = `${currentMove}: ${mins}:${secs}`;
+      if(mins==0 && secs ==0){
+        currentMove === "red"? alert("Blue won!") : alert("Red won!")
+        location.reload()
+      }
+    }
+
+    function startTimer(){
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+      if(currentMove === "red"){
+        redTime--;
+        updateTimer("red",redTime);
+      }
+      else{
+        blueTime--;
+        updateTimer("blue",blueTime);
+      }
+    },1000);
+  }
+
+  
+
     //none-0
     //red-1
     //blue-2
@@ -115,7 +170,7 @@
         const p=document.createElement('p')
         p.className="p"
         p.style.left=`${xa+30}px`
-        p.style.top=`${ya+6}px`
+        p.style.top=`${ya+2}px`
         p.innerText=weight[i-1]
        
         document.body.appendChild(p);
@@ -127,7 +182,7 @@
             const p=document.createElement('p')
             p.className="p"
             p.style.left=`${xa+30}px`
-            p.style.top=`${ya+6}px`
+            p.style.top=`${ya+4}px`
             p.innerText="1"
             
             document.body.appendChild(p);
@@ -137,8 +192,8 @@
             const ya=(Node[i][0][1]+Node[i+1][0][1])/2
             const p=document.createElement('p')
         p.className="p"
-        p.style.left=`${xa+30}px`
-        p.style.top=`${ya+6}px`
+        p.style.left=`${xa+15}px`
+        p.style.top=`${ya-5}px`
         p.innerText=weight[i-1]
         
         document.body.appendChild(p);
@@ -171,7 +226,7 @@
         // Style the line
         line.style.position = "absolute";
         line.style.left = `${x1+25}px`;
-        line.style.top = `${y1+40}px`;
+        line.style.top = `${y1+25}px`;
         line.style.width =` ${length}px`;
         line.style.height = "2px";
         line.style.backgroundColor = "black";
@@ -292,6 +347,9 @@
             }
         }
     }
+    function moveTimer(currentMove){
+
+    }
     const turn=[1,0]//red-0,blue-1
     const move=[0,0]
     const titan=[4,4]
@@ -307,6 +365,7 @@
         
     }
 
+  
    const alreadyClicked=[0,0]
     function moveTrack(event){
         if(turn[0]==1){//red turn
@@ -316,7 +375,9 @@
                     turn[0]=0
                 turn[1]=1
                 titan[0]-=1
-                    currentMove = "blue"}
+                    currentMove = "blue";
+                    startTimer();
+                  }
                 
             }
             else if(data[event.target.value]==1){
@@ -336,6 +397,7 @@
                 turn[1]=1
                
                 currentMove = "blue"
+                startTimer();
             }
         else{
             alreadyClicked[0]=0;
@@ -352,6 +414,7 @@
                 titan[1]-=1
                 createTitan(event.target.value)
                 currentMove = "red"
+                startTimer();
                 }
                 
             }
@@ -370,6 +433,7 @@
                 turn[1]=0
                 
                 currentMove = "red"
+                startTimer();
             }
             else{
                 alreadyClicked[0]=0;

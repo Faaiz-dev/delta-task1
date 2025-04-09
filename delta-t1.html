@@ -108,6 +108,7 @@
         
     for(i=1;i<=18;i++)
         {
+        
         if(i%6==0){
             const xa=(Node[i][0][0]+Node[i-5][0][0])/2
         const ya=(Node[i][0][1]+Node[i-5][0][1])/2
@@ -225,8 +226,12 @@
         let o=0;
         a=Number(a)
         b=Number(b)
-        console.log('Move')
-        if(b%6==0){
+        if((a==12 && b==18) || (a==18 && b==12)){
+          data[b]=data[a]
+          data[a]=0
+          o=1
+        }
+        else if(b%6==0){
             if(a==b-5||a==b-1){
                 data[b]=data[a]
                 data[a]=0
@@ -255,15 +260,12 @@
             }
         }
         else{
-            console.log(`process a-${a} b-${b}`)
             if(a==b+1||a==b-1){
                 data[b]=data[a]
                 data[a]=0
-                console.log('done')
                 o=1
             }
         }
-        console.log(data)
         colorender()
         Change()
         if(o==1){

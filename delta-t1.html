@@ -235,13 +235,16 @@
     
         document.body.appendChild(line);
     }
-    const scoredEdges = {};
+    let scoredEdges = {};
     function updateScore() {
+        let scoreRed=0
+        let scoreBlue=0
+        Object.keys(scoredEdges).forEach(key => delete scoredEdges[key]);
         for(let i = 1; i <= 18; i++) {
             if(data[i] !== 0 && data[i+1] !== 0 && data[i] === data[i+1] && i % 6 !== 0){
-                const key = `${i}-${i+1}`;
+                const key = `${i}-${i+1} `;
                 if (!scoredEdges[key]) {
-                    data[i] === 1 ? score.Red += weight[i - 1] : score.Blue += weight[i - 1];
+                    data[i] === 1 ? scoreRed += weight[i - 1] : scoreBlue += weight[i - 1];
                     scoredEdges[key] = true;
                 }
             }
@@ -249,7 +252,7 @@
             if([1,5,3,12,10,8].includes(i) && data[i] !== 0 && data[i+6] !== 0 && data[i] === data[i+6]){
                 const key = `${i}-${i+6}`;
                 if (!scoredEdges[key]) {
-                    data[i] === 1 ? score.Red += 1 : score.Blue += 1;
+                    data[i] === 1 ? scoreRed += 1 : scoreBlue += 1;
                     scoredEdges[key] = true;
                 }
             }
@@ -257,24 +260,26 @@
             else if(i % 6 == 0 && data[i] !== 0 && data[i-5] !== 0 && data[i] === data[i-5]){
                 const key = `${i}-${i-5}`;
                 if (!scoredEdges[key]) {
-                    data[i] === 1 ? score.Red += weight[i - 1] : score.Blue += weight[i - 1];
+                    data[i] === 1 ? scoreRed += weight[i - 1] : scoreBlue += weight[i - 1];
                     scoredEdges[key] = true;
                 }
             }
         }
+        score.Red=scoreRed
+        score.Blue=scoreBlue
         renderScore();
     }
     const unlock=[0,0,1,0]
     function Unlock(){
-        if(!data.slice(13,19).includes(0)){
-            unlock[1]=1;
-        }
-        if(!data.slice(7,13).includes(0)){
-            unlock[0]=1;
-        }
-        if(!data.slice(1,7).includes(0)){
-            unlock[3]=1;
-        }
+      if(!data.slice(13,19).includes(0)){
+          unlock[1]=1;
+      }
+      if(!data.slice(7,13).includes(0)){
+          unlock[0]=1;
+      }
+      if(!data.slice(1,7).includes(0)){
+          unlock[3]=1;
+      }
     }
     Unlock()
     function Move(a,b){
@@ -347,9 +352,7 @@
             }
         }
     }
-    function moveTimer(currentMove){
 
-    }
     const turn=[1,0]//red-0,blue-1
     const move=[0,0]
     const titan=[4,4]

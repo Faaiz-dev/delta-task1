@@ -8,7 +8,6 @@ let blueTime = 600;
 let intervalId = null;
 let currentMove = "red";
 let status = true;
-
 function isResume(stat){
     status = stat
     if (status){
@@ -29,8 +28,6 @@ function renderScore(){
     document.querySelector(".move-history").innerHTML = moveHistory
 }
 renderScore();
-
-
 
 function updateTimer(currentMove,time){
   const mins = Math.floor(time/60);
@@ -58,55 +55,77 @@ function startTimer(){
 
 const unlock=[0,0,1,0]
 
-function undo(){
-    const removed = moveHistory.pop()
-    removedItems.push(removed)
-    if(removed[1] == 0){
-        currentMove = data[removed[2]]==1?"Red":"Blue"
-        data[removed[2]] = 0
-    }
-    else{
-        move(removed[2],removed[1])
-    }
-    clearInterval(intervalId); 
-    status = false;
-    Unlock()
-    renderScore()
-    colorender()
-    if (currentMove === "Red") {
-        redTime--;
+function undo() {
+
+    if (moveHistory.length === 0) return;
+    const lastMove = moveHistory.pop();
+    removedItems.push(lastMove);
+    const [player, a, b] = lastMove;
+    data[b] = 0;
+    if (a === 0) {
+        if (player === "R") titan[0]++;
+        else titan[1]++;
     } else {
-        blueTime--; 
+        data[a] = player === "R" ? 1 : 2;
+    }
+    
+    if (player === "R") {
+        turn[0] = 1;
+        turn[1] = 0;
+        currentMove = "red";
+    } else {
+        turn[0] = 0;
+        turn[1] = 1;
+        currentMove = "blue";
     }
 
+    alreadyClicked[0] = 0;
+    alreadyClicked[1] = 0;
+    Unlock();
+    updateScore();
+    renderScore();
+    colorender();
     startTimer();
 }
-  
-function redo(){
-    const redoItem = removedItems.pop()
-    if(redoItem[1]==0){
-        if(redoItem[0]=="R"){
-            currentMove = "red"
-            createTitan(redoItem[2])
-        }
-        else{
-            currentMove = "blue"
-            createTitan(redoItem[2])
-        }
+
+function redo() {
+    if (removedItems.length === 0) return;
+    const moveToRedo = removedItems.pop();
+    moveHistory.push(moveToRedo);
+    const player = moveToRedo[0].toUpperCase();
+    const a = moveToRedo[1];
+    const b = moveToRedo[2];
+
+    if (a === 0) {
+        data[b] = player === "R" ? 1 : 2;
+        if (player === "R") titan[0]--;
+        else titan[1]--;
+    } else {
+        data[a] = 0;
+        data[b] = player === "R" ? 1 : 2;
     }
-    else{
-        move(redoItem[1],redoItem[2])
+
+    if (player === "R") {
+        turn[0] = 0;
+        turn[1] = 1;
+        currentMove = "blue";
+    } else {
+        turn[0] = 1;
+        turn[1] = 0;
+        currentMove = "red";
     }
-    renderScore()
-    colorender()
-    Unlock()
+
+    Unlock();
+    updateScore();
+    renderScore();
+    colorender();
+    startTimer();
 }
 
 //none-0
 //red-1
 //blue-2
 const data=[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
 
 const weight=[9,8,8,9,8,8,4,5,6,4,5,6,3,2,1,2,1,1]
 const hex=document.getElementById("hex")
@@ -123,7 +142,6 @@ for (let i=0;i<3;i++){
         let y=yCentre+r[i]*Math.sin(angle)
         x=Math.round(x)
         y=Math.round(y)
-        
         
         const node=document.createElement('button')
         node.className="node"
@@ -247,16 +265,21 @@ function updateScore() {
     renderScore();
 }
 
-
 function Unlock(){
     if(!data.slice(13,19).includes(0)){
         unlock[1]=1;
+    }else{
+        unlock[1]=0;
     }
     if(!data.slice(7,13).includes(0)){
         unlock[0]=1;
+    }else{
+        unlock[0]=0;
     }
     if(!data.slice(1,7).includes(0)){
         unlock[3]=1;
+    }else{
+        unlock[3]=0;
     }
 }
 Unlock()
@@ -269,6 +292,7 @@ function Move(a,b){
       data[a]=0
       o=1
       lastMove = [data[b]==1? "R":"B" ,a,b]
+      removedItems = []; // Clear redo stack
       moveHistory.push(lastMove)
     }
     else if(b%6==0){
@@ -277,6 +301,7 @@ function Move(a,b){
             data[a]=0
             o=1
             lastMove = [data[b]==1? "R":"B" ,a,b]
+            removedItems = []; // Clear redo stack
             moveHistory.push(lastMove)
         }
     }
@@ -286,6 +311,7 @@ function Move(a,b){
             data[a]=0
             o=1
             lastMove = [data[b]==1? "R":"B" ,a,b]
+            removedItems = []; // Clear redo stack
             moveHistory.push(lastMove)
         }
     }
@@ -295,6 +321,7 @@ function Move(a,b){
             data[a]=0
             o=1
             lastMove = [data[b]==1? "R":"B" ,a,b]
+            removedItems = []; // Clear redo stack
             moveHistory.push(lastMove)
         }
     }
@@ -304,6 +331,7 @@ function Move(a,b){
             data[a]=0
             o=1
             lastMove = [data[b]==1? "R":"B" ,a,b]
+            removedItems = []; // Clear redo stack
             moveHistory.push(lastMove)
         }
     }
@@ -313,6 +341,7 @@ function Move(a,b){
             data[a]=0
             o=1
             lastMove = [data[b]==1? "R":"B" ,a,b]
+            removedItems = []; // Clear redo stack
             moveHistory.push(lastMove)
         }
     }
@@ -354,7 +383,7 @@ const titan=[4,4]
 function createTitan(id){
     const button=document.getElementById(id)
     button.style.backgroundColor=currentMove
-    if(currentMove=='red'){
+    if(currentMove=='red' ){
         data[id]=1
         lastMove = ["R",0,id]
     }
@@ -362,9 +391,9 @@ function createTitan(id){
         data[id]=2
         lastMove = ["B",0,id]
     }
+    removedItems = []; // Clear redo stack
     moveHistory.push(lastMove)
 }
-
 
 const alreadyClicked=[0,0]
 function moveTrack(event){
@@ -464,5 +493,3 @@ function colorender(){
         console.log(button)
     }
   }
-
-  

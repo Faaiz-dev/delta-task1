@@ -149,8 +149,8 @@ for(i=1;i<=18;i++)
     const ya=(Node[i][0][1]+Node[i-5][0][1])/2
     const p=document.createElement('p')
     p.className="p"
-    p.style.left=`${xa+35}px`
-    p.style.top=`${ya+75}px`
+    p.style.left=`${xa+25}px`
+    p.style.top=`${ya+60}px`
     p.innerText=weight[i-1]
     
     document.body.appendChild(p);
@@ -162,7 +162,7 @@ for(i=1;i<=18;i++)
         const p=document.createElement('p')
         p.className="p"
         p.style.left=`${xa+30}px`
-        p.style.top=`${ya+80}px`
+        p.style.top=`${ya+65}px`
         p.innerText="1"
         
         document.body.appendChild(p);
@@ -173,7 +173,7 @@ for(i=1;i<=18;i++)
         const p=document.createElement('p')
     p.className="p"
     p.style.left=`${xa+15}px`
-    p.style.top=`${ya+75}px`
+    p.style.top=`${ya+35}px`
     p.innerText=weight[i-1]
     
     document.body.appendChild(p);
@@ -201,7 +201,7 @@ function lineCreate(x1, y1, x2, y2) {
     const angle = Math.atan2(dy, dx) * (180 / Math.PI); 
     line.style.position = "absolute";
     line.style.left = `${x1+17}px`;
-    line.style.top = `${y1+110}px`;
+    line.style.top = `${y1+70}px`;
     line.style.width =` ${length}px`;
     line.style.height = "2px";
     line.style.backgroundColor = "black";

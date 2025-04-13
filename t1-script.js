@@ -233,13 +233,14 @@ function updateScore() {
                 scoredEdges[key] = true;
             }
         }
-        else if (i % 6 === 0 && data[i] !== 0 && data[i - 5] !== 0 && data[i] === data[i - 5]) {
+        if (i % 6 === 0 && data[i] !== 0 && data[i - 5] !== 0 && data[i] === data[i - 5]) {
             const key = `${i}-${i - 5}`;
             if (!scoredEdges[key]) {
                 data[i] === 1 ? scoreRed += weight[i - 1] : scoreBlue += weight[i - 1];
                 scoredEdges[key] = true;
             }
         }
+
     }
     score.Red = scoreRed;
     score.Blue = scoreBlue;
@@ -333,6 +334,11 @@ function Change(){
     if(unlock[3]==1){
         if(score.Red>score.Blue){
             alert("Red Wins")
+            location.reload()
+        }
+        else if(score.Red == score.Blue){
+            colorender()
+            alert("Match Drawn")
             location.reload()
         }
         else{

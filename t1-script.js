@@ -1,3 +1,20 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const centerContent = document.getElementById('center-content');
+    
+    sidebarToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('collapsed');
+      sidebarToggle.classList.toggle('collapsed');
+      
+      if (sidebar.classList.contains('collapsed')) {
+        sidebarToggle.textContent = '▶';
+      } else {
+        sidebarToggle.textContent = '◀';
+      }
+    });
+});
+
 const score = {
     Red: 0,
     Blue: 0
@@ -31,25 +48,25 @@ renderScore();
 
 function playMoveAudio() {
     const audio1 = document.getElementById("move");
-    audio1.play();
+    audio1?.play();
 }
 
 function playCreateAudio() {
     const audio2 = document.getElementById("create");
-    audio2.play();
+    audio2?.play();
 }
 
 function playIllegalAudio() {
     const audio3 = document.getElementById("illegal");
-    audio3.play();
+    audio3?.play();
 }
 
 function updateTimer(currentMove, time) {
     const mins = Math.floor(time / 60);
     const secs = Math.floor(time % 60);
     document.querySelector(`.${currentMove}-timer`).innerHTML = `${currentMove}: ${mins}:${secs}`;
-    if (mins == 0 && secs == 0) {
-        currentMove === "red" ? alert("Blue won!") : alert("Red won!");
+    if (mins === 0 && secs === 0) {
+        alert(currentMove === "red" ? "Blue won!" : "Red won!");
         location.reload();
     }
 }
@@ -68,7 +85,6 @@ function startTimer() {
 }
 
 const unlock = [0, 0, 1, 0];
-
 
 function undo() {
     if (moveHistory.length === 0) return;
@@ -99,8 +115,8 @@ function undo() {
     alreadyClicked[0] = 0;
     alreadyClicked[1] = 0;
     Unlock();
-    console.log(lastMove)
-    console.log(unlock)
+    console.log(lastMove);
+    console.log(unlock);
     updateScore();
     renderScore();
     if (a === 0) colorender();
@@ -143,11 +159,13 @@ function redo() {
     startTimer();
 }
 
-// none-0, red-1, blue-2
-const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+// Game board data
+const data = Array(19).fill(0); // 1-18 used, 0 unused
 const weight = [9, 8, 8, 9, 8, 8, 4, 5, 6, 4, 5, 6, 3, 2, 1, 2, 1, 1];
 const hex = document.getElementById("hex");
-const xCentre = window.innerWidth / 2;
+const originalXCentre = window.innerWidth / 2; // Original center for lines
+const nodeXCentre = originalXCentre; // Center for nodes (can be adjusted)
+const leftOffset = 240; // Offset to move nodes left
 const r = [100, 200, 300];
 const yCentre = window.innerHeight / 2;
 let k = 1;
@@ -156,28 +174,28 @@ let Node = [];
 for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 6; j++) {
         const angle = (Math.PI / 180) * 60 * j;
-        let x = xCentre + r[i] * Math.cos(angle);
+        let x = nodeXCentre + r[i] * Math.cos(angle); // Base x from nodeXCentre
         let y = yCentre + r[i] * Math.sin(angle);
-        x = Math.round(x);
+        x = Math.round(x - leftOffset); // Apply left offset to nodes only
         y = Math.round(y);
 
         const node = document.createElement('button');
         node.className = "node";
         node.id = k;
         node.innerText = `${k}`;
-        node.style.left = `${x}px`;
+        node.style.left = `${x}px`; // Use shifted x for nodes
         node.style.top = `${y}px`;
         node.value = k;
         node.addEventListener("click", moveTrack);
         hex.appendChild(node);
-        Node[k] = [x, y];
-        k = k + 1;
+        Node[k] = [x, y]; // Store shifted coordinates
+        k++;
     }
 }
 
-for (i = 1; i <= 18; i++) {
-    if (i % 6 == 0) {
-        const xa = (Node[i][0] + Node[i - 5][0]) / 2;
+for (let i = 1; i <= 18; i++) {
+    if (i % 6 === 0) {
+        const xa = (Node[i][0] + Node[i - 5][0]) / 2 + leftOffset; // Adjust for node shift
         const ya = (Node[i][1] + Node[i - 5][1]) / 2;
         const p = document.createElement('p');
         p.className = "p";
@@ -187,7 +205,7 @@ for (i = 1; i <= 18; i++) {
         document.body.appendChild(p);
     }
     if ([1, 5, 3, 12, 10, 8].includes(i)) {
-        const xa = (Node[i][0] + Node[i + 6][0]) / 2;
+        const xa = (Node[i][0] + Node[i + 6][0]) / 2 + leftOffset; // Adjust for node shift
         const ya = (Node[i][1] + Node[i + 6][1]) / 2;
         const p = document.createElement('p');
         p.className = "p";
@@ -196,8 +214,8 @@ for (i = 1; i <= 18; i++) {
         p.innerText = "1";
         document.body.appendChild(p);
     }
-    if (i % 6 != 0) {
-        const xa = (Node[i][0] + Node[i + 1][0]) / 2;
+    if (i % 6 !== 0) {
+        const xa = (Node[i][0] + Node[i + 1][0]) / 2 + leftOffset; // Adjust for node shift
         const ya = (Node[i][1] + Node[i + 1][1]) / 2;
         const p = document.createElement('p');
         p.className = "p";
@@ -209,15 +227,9 @@ for (i = 1; i <= 18; i++) {
 }
 
 for (let i = 1; i <= 18; i++) {
-    if (i % 6 != 0) {
-        lineCreate(Node[i][0], Node[i][1], Node[i + 1][0], Node[i + 1][1]);
-    }
-    if ([1, 5, 3, 12, 10, 8].includes(i)) {
-        lineCreate(Node[i][0], Node[i][1], Node[i + 6][0], Node[i + 6][1]);
-    }
-    if (i % 6 == 0) {
-        lineCreate(Node[i][0], Node[i][1], Node[i - 5][0], Node[i - 5][1]);
-    }
+    if (i % 6 !== 0) lineCreate(Node[i][0] + leftOffset, Node[i][1], Node[i + 1][0] + leftOffset, Node[i + 1][1]);
+    if ([1, 5, 3, 12, 10, 8].includes(i)) lineCreate(Node[i][0] + leftOffset, Node[i][1], Node[i + 6][0] + leftOffset, Node[i + 6][1]);
+    if (i % 6 === 0) lineCreate(Node[i][0] + leftOffset, Node[i][1], Node[i - 5][0] + leftOffset, Node[i - 5][1]);
 }
 
 function lineCreate(x1, y1, x2, y2) {
@@ -273,22 +285,19 @@ function updateScore() {
     renderScore();
 }
 
-
 function Unlock() {
-    
-    if (!data.slice(13, 19).includes(0) || !data.slice(7,13).includes(0)) {
+    if (!data.slice(13, 19).includes(0) || !data.slice(7, 13).includes(0)) {
         unlock[1] = 1;
-    }else if(lastMove[1]==0 && lastMove[2]>=13 && !data.slice(7, 13).includes(0)){
-        unlock[1] = 0
+    } else if (lastMove[1] === 0 && lastMove[2] >= 13 && !data.slice(7, 13).includes(0)) {
+        unlock[1] = 0;
     }
-
-    }
-    if (!data.slice(7, 13).includes(0) || !data.slice(1,7).includes(0)) {
+    if (!data.slice(7, 13).includes(0) || !data.slice(1, 7).includes(0)) {
         unlock[0] = 1;
     }
     if (!data.slice(1, 7).includes(0)) {
         unlock[3] = 1;
-    } 
+    }
+}
 
 Unlock();
 
@@ -303,12 +312,12 @@ function Move(a, b) {
         data[a] = 0;
         playMoveAudio();
         o = 1;
-        lastMove = [data[b] == 1 ? "R" : "B", a, b];
+        lastMove = [data[b] === 1 ? "R" : "B", a, b];
         removedItems = [];
         moveHistory.push(lastMove);
-        console.log(`successfully moved from ${a} to ${b}`)
-        moveHighlight(Node[a], Node[b], data[b] == 1 ? "red" : "blue");
-        if (data[b] == 1) {
+        console.log(`Successfully moved from ${a} to ${b}`);
+        moveHighlight(Node[a], Node[b], data[b] === 1 ? "red" : "blue");
+        if (data[b] === 1) {
             turn[0] = 0;
             turn[1] = 1;
             currentMove = "blue";
@@ -319,29 +328,16 @@ function Move(a, b) {
         }
     };
 
-    if ((a == 12 && b == 18) || (a == 18 && b == 12)) {
-        performMove();
-    } else if (b % 6 == 0) {
-        if (a == b - 5 || a == b - 1) {
-            performMove();
-        }
-    } else if (a % 6 == 0) {
-        if (a == b + 1 || a == b + 5) {
-            performMove();
-        }
+    if ((a === 12 && b === 18) || (a === 18 && b === 12)) performMove();
+    else if (b % 6 === 0) {
+        if (a === b - 5 || a === b - 1) performMove();
+    } else if (a % 6 === 0) {
+        if (a === b + 1 || a === b + 5) performMove();
     } else if ([1, 3, 5, 8, 10, 12].includes(a)) {
-        if (a == b + 1 || a == b - 1 || a == b - 6) {
-            performMove();
-        }
+        if (a === b + 1 || a === b - 1 || a === b - 6) performMove();
     } else if ([1, 3, 5, 8, 10, 12].includes(b)) {
-        if (a == b + 1 || a == b - 1 || a == b + 6) {
-            performMove();
-        }
-    } else {
-        if (a == b + 1 || a == b - 1) {
-            performMove();
-        }
-    }
+        if (a === b + 1 || a === b - 1 || a === b + 6) performMove();
+    } else if (a === b + 1 || a === b - 1) performMove();
 
     if (o === 1) {
         Unlock();
@@ -379,7 +375,7 @@ function moveHighlight(p, q, color, callback) {
     setTimeout(() => {
         highlight.style.transition = 'opacity 0.2s ease-in-out';
         highlight.style.opacity = '0';
-        if (callback) callback(); 
+        if (callback) callback();
         Change();
         setTimeout(() => {
             highlight.style.transition = 'none';
@@ -393,12 +389,12 @@ function Change() {
     updateScore();
     colorender();
     Unlock();
-    if (unlock[3] == 1) {
+    if (unlock[3] === 1) {
         if (score.Red > score.Blue) {
+
             alert("Red Wins");
             location.reload();
-        } else if (score.Red == score.Blue) {
-            colorender();
+        } else if (score.Red === score.Blue) {
             alert("Match Drawn");
             location.reload();
         } else {
@@ -415,12 +411,12 @@ const titan = [4, 4];
 function createTitan(id) {
     const button = document.getElementById(id);
     button.style.backgroundColor = currentMove;
-    if (currentMove == 'red') {
+    if (currentMove === 'red') {
         data[id] = 1;
         lastMove = ["R", 0, id];
         playCreateAudio();
     }
-    if (currentMove == 'blue') {
+    if (currentMove === 'blue') {
         data[id] = 2;
         lastMove = ["B", 0, id];
         playCreateAudio();
@@ -440,13 +436,11 @@ function moveTrack(event) {
     if (isRedTurn) {
         if (alreadyClicked[0] === 0) {
             if (data[id] === 0 && unlocked) {
-                if (titan[0] <= 0) {
-                    playIllegalAudio();
-                } else if (id >= 1 && id <= 6 && unlock[3] === 1) {
-                    playIllegalAudio();
-                } else {
+                if (titan[0] <= 0) playIllegalAudio();
+                else if (id >= 1 && id <= 6 && unlock[3] === 1) playIllegalAudio();
+                else {
                     createTitan(id);
-                    titan[0] -= 1;
+                    titan[0]--;
                     turn[0] = 0;
                     turn[1] = 1;
                     currentMove = "blue";
@@ -456,9 +450,7 @@ function moveTrack(event) {
                 }
             } else if (data[id] === 1) {
                 alreadyClicked[0] = id;
-            } else {
-                playIllegalAudio();
-            }
+            } else playIllegalAudio();
         } else {
             if (unlocked && Move(alreadyClicked[0], id)) {
                 alreadyClicked[0] = 0;
@@ -470,13 +462,11 @@ function moveTrack(event) {
     } else if (isBlueTurn) {
         if (alreadyClicked[1] === 0) {
             if (data[id] === 0 && unlocked) {
-                if (titan[1] <= 0) {
-                    playIllegalAudio();
-                } else if (id >= 1 && id <= 6 && unlock[3] === 1) {
-                    playIllegalAudio();
-                } else {
+                if (titan[1] <= 0) playIllegalAudio();
+                else if (id >= 1 && id <= 6 && unlock[3] === 1) playIllegalAudio();
+                else {
                     createTitan(id);
-                    titan[1] -= 1;
+                    titan[1]--;
                     turn[0] = 1;
                     turn[1] = 0;
                     currentMove = "red";
@@ -486,9 +476,7 @@ function moveTrack(event) {
                 }
             } else if (data[id] === 2) {
                 alreadyClicked[1] = id;
-            } else {
-                playIllegalAudio();
-            }
+            } else playIllegalAudio();
         } else {
             if (unlocked && Move(alreadyClicked[1], id)) {
                 alreadyClicked[1] = 0;
@@ -498,22 +486,20 @@ function moveTrack(event) {
             }
         }
     }
-
     renderScore();
 }
 
 function colorender() {
-    for (i = 1; i <= 18; i++) {
+    for (let i = 1; i <= 18; i++) {
         const button = document.getElementById(i);
-        if (data[i] != 0) {
-            if (data[i] == 1) {
-                button.style.backgroundColor = 'red';
-            } else {
-                button.style.backgroundColor = 'blue';
-            }
+        if (data[i] !== 0) {
+            button.style.backgroundColor = data[i] === 1 ? 'red' : 'blue';
         } else {
             button.style.backgroundColor = '';
         }
-        
     }
 }
+
+// Initialize the game on page load
+document.addEventListener('DOMContentLoaded', initializeGameBoard);
+window.addEventListener('resize', initializeGameBoard);

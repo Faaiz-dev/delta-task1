@@ -67,12 +67,6 @@ h2 {
   color: #2c3e50;
 }
 
-.hex-container {
-  position: relative; 
-  z-index: 1;
-  margin-top: 100px; 
-}
-
 
 
 body {
@@ -87,14 +81,17 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1;
+  margin-top: 60px;
 }
+
 
 .status-bar {
   position: absolute;
-  top: 20px;
+  top: 5px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   padding: 10px 20px;
   background: #fff;
@@ -109,7 +106,25 @@ body {
   color: white;
   border-radius: 6px;
   cursor: pointer;
+}
+.move-history {
+  flex-basis: 100%;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+  word-break: break-word;
+}
 
+.history-div{
+  flex-basis: 100%;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+  word-break: break-word;
+}
+
+.move-history {
+  white-space: pre-wrap;
 }
 .status-bar button:hover {
   background-color: #0056b3;
@@ -137,9 +152,23 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.5s ease-in-out ;
   z-index: 2;
 }
+
+.highlight {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  transition: left 0.5s ease-in-out, top 0.5s ease-in-out, opacity 0.5s ease-in-out, background-color 0.5s ease-in-out;
+  opacity: 0;
+  z-index: 1;
+}
+
 .node:hover {
   background-color: #e2e6ea;
   transform: scale(1.05);
@@ -148,4 +177,8 @@ body {
   position: absolute;
   color: #333;
   font-size: 0.9;
+}
+
+.move-history{
+  display: block;
 }

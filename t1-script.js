@@ -8,57 +8,71 @@ let blueTime = 600;
 let intervalId = null;
 let currentMove = "red";
 let status = true;
-function isResume(stat){
-    status = stat
-    if (status){
-        startTimer()
+
+function isResume(stat) {
+    status = stat;
+    if (status) {
+        startTimer();
+    } else {
+        clearInterval(intervalId);
     }
-    else{
-        clearInterval(intervalId)
-    };
 }
 
 let moveHistory = [];
 let removedItems = [];
 let lastMove = "";
 
-function renderScore(){
+function renderScore() {
     document.querySelector(".display-score").innerHTML = `<p>Red: ${score.Red}  Blue: ${score.Blue}</p>`;
-    document.querySelector(".displayPlayerMove").innerHTML = `${currentMove} to play`
-    document.querySelector(".move-history").innerHTML = moveHistory
+    document.querySelector(".displayPlayerMove").innerHTML = `${currentMove} to play`;
+    document.querySelector(".move-history").innerHTML = moveHistory;
 }
 renderScore();
 
-function updateTimer(currentMove,time){
-  const mins = Math.floor(time/60);
-  const secs = Math.floor(time%60);
-  document.querySelector(`.${currentMove}-timer`).innerHTML = `${currentMove}: ${mins}:${secs}`;
-  if(mins==0 && secs ==0){
-    currentMove === "red"? alert("Blue won!") : alert("Red won!")
-    location.reload()
-  }
+function playMoveAudio() {
+    const audio1 = document.getElementById("move");
+    audio1.play();
 }
 
-function startTimer(){
-  clearInterval(intervalId);
-  intervalId = setInterval(() => {
-  if(currentMove === "red" &&  status ){
-    redTime--;
-    updateTimer("red",redTime);
-  }
-  else if(currentMove === "blue" && status){
-    blueTime--;
-    updateTimer("blue",blueTime);
-  }
-},1000);
+function playCreateAudio() {
+    const audio2 = document.getElementById("create");
+    audio2.play();
 }
 
-const unlock=[0,0,1,0]
+function playIllegalAudio() {
+    const audio3 = document.getElementById("illegal");
+    audio3.play();
+}
+
+function updateTimer(currentMove, time) {
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    document.querySelector(`.${currentMove}-timer`).innerHTML = `${currentMove}: ${mins}:${secs}`;
+    if (mins == 0 && secs == 0) {
+        currentMove === "red" ? alert("Blue won!") : alert("Red won!");
+        location.reload();
+    }
+}
+
+function startTimer() {
+    clearInterval(intervalId);
+    intervalId = setInterval(() => {
+        if (currentMove === "red" && status) {
+            redTime--;
+            updateTimer("red", redTime);
+        } else if (currentMove === "blue" && status) {
+            blueTime--;
+            updateTimer("blue", blueTime);
+        }
+    }, 1000);
+}
+
+const unlock = [0, 0, 1, 0];
+
 
 function undo() {
-
     if (moveHistory.length === 0) return;
-    const lastMove = moveHistory.pop();
+    lastMove = moveHistory.pop();
     removedItems.push(lastMove);
     const [player, a, b] = lastMove;
     data[b] = 0;
@@ -67,8 +81,11 @@ function undo() {
         else titan[1]++;
     } else {
         data[a] = player === "R" ? 1 : 2;
+        moveHighlight(Node[b], Node[a], player === "R" ? "red" : "blue", () => {
+            colorender();
+        });
     }
-    
+
     if (player === "R") {
         turn[0] = 1;
         turn[1] = 0;
@@ -82,9 +99,11 @@ function undo() {
     alreadyClicked[0] = 0;
     alreadyClicked[1] = 0;
     Unlock();
+    console.log(lastMove)
+    console.log(unlock)
     updateScore();
     renderScore();
-    colorender();
+    if (a === 0) colorender();
     startTimer();
 }
 
@@ -103,6 +122,9 @@ function redo() {
     } else {
         data[a] = 0;
         data[b] = player === "R" ? 1 : 2;
+        moveHighlight(Node[a], Node[b], player === "R" ? "red" : "blue", () => {
+            colorender();
+        });
     }
 
     if (player === "R") {
@@ -114,120 +136,107 @@ function redo() {
         turn[1] = 0;
         currentMove = "red";
     }
-
     Unlock();
     updateScore();
     renderScore();
-    colorender();
+    if (a === 0) colorender();
     startTimer();
 }
 
-//none-0
-//red-1
-//blue-2
-const data=[0,0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+// none-0, red-1, blue-2
+const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+const weight = [9, 8, 8, 9, 8, 8, 4, 5, 6, 4, 5, 6, 3, 2, 1, 2, 1, 1];
+const hex = document.getElementById("hex");
+const xCentre = window.innerWidth / 2;
+const r = [100, 200, 300];
+const yCentre = window.innerHeight / 2;
+let k = 1;
+let Node = [];
 
-const weight=[9,8,8,9,8,8,4,5,6,4,5,6,3,2,1,2,1,1]
-const hex=document.getElementById("hex")
-const xCentre=window.innerWidth/2;
-const r=[100,200,300]
-const yCentre=window.innerHeight/2;
-let k=1;
-let Node={}
+for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 6; j++) {
+        const angle = (Math.PI / 180) * 60 * j;
+        let x = xCentre + r[i] * Math.cos(angle);
+        let y = yCentre + r[i] * Math.sin(angle);
+        x = Math.round(x);
+        y = Math.round(y);
 
-for (let i=0;i<3;i++){
-    for(let j=0;j<6;j++){
-        const angle=(Math.PI/180)*60*j
-        let x=xCentre+r[i]*Math.cos(angle)
-        let y=yCentre+r[i]*Math.sin(angle)
-        x=Math.round(x)
-        y=Math.round(y)
-        
-        const node=document.createElement('button')
-        node.className="node"
-        node.id=k
-            node.innerText=`${k}`
-            node.style.left=`${x}px`
-            node.style.top=`${y}px`
-            node.value=k
-            node.addEventListener("click",moveTrack)
-            hex.appendChild(node)
-            Node[k]=[]
-            Node[k].push([x,y])
-            k=k+1;
-            
+        const node = document.createElement('button');
+        node.className = "node";
+        node.id = k;
+        node.innerText = `${k}`;
+        node.style.left = `${x}px`;
+        node.style.top = `${y}px`;
+        node.value = k;
+        node.addEventListener("click", moveTrack);
+        hex.appendChild(node);
+        Node[k] = [x, y];
+        k = k + 1;
     }
 }
 
-for(i=1;i<=18;i++)
-    {
-    
-    if(i%6==0){
-        const xa=(Node[i][0][0]+Node[i-5][0][0])/2
-    const ya=(Node[i][0][1]+Node[i-5][0][1])/2
-    const p=document.createElement('p')
-    p.className="p"
-    p.style.left=`${xa+25}px`
-    p.style.top=`${ya+60}px`
-    p.innerText=weight[i-1]
-    
-    document.body.appendChild(p);
-    
-    }
-    if([1,5,3,12,10,8].includes(i)){
-        const xa=(Node[i][0][0]+Node[i+6][0][0])/2
-        const ya=(Node[i][0][1]+Node[i+6][0][1])/2
-        const p=document.createElement('p')
-        p.className="p"
-        p.style.left=`${xa+30}px`
-        p.style.top=`${ya+65}px`
-        p.innerText="1"
-        
+for (i = 1; i <= 18; i++) {
+    if (i % 6 == 0) {
+        const xa = (Node[i][0] + Node[i - 5][0]) / 2;
+        const ya = (Node[i][1] + Node[i - 5][1]) / 2;
+        const p = document.createElement('p');
+        p.className = "p";
+        p.style.left = `${xa + 25}px`;
+        p.style.top = `${ya + 60}px`;
+        p.innerText = weight[i - 1];
         document.body.appendChild(p);
     }
-    if(i%6!=0){
-        const xa=(Node[i][0][0]+Node[i+1][0][0])/2
-        const ya=(Node[i][0][1]+Node[i+1][0][1])/2
-        const p=document.createElement('p')
-    p.className="p"
-    p.style.left=`${xa+15}px`
-    p.style.top=`${ya+35}px`
-    p.innerText=weight[i-1]
-    
-    document.body.appendChild(p);
-    
+    if ([1, 5, 3, 12, 10, 8].includes(i)) {
+        const xa = (Node[i][0] + Node[i + 6][0]) / 2;
+        const ya = (Node[i][1] + Node[i + 6][1]) / 2;
+        const p = document.createElement('p');
+        p.className = "p";
+        p.style.left = `${xa + 30}px`;
+        p.style.top = `${ya + 65}px`;
+        p.innerText = "1";
+        document.body.appendChild(p);
     }
-    
+    if (i % 6 != 0) {
+        const xa = (Node[i][0] + Node[i + 1][0]) / 2;
+        const ya = (Node[i][1] + Node[i + 1][1]) / 2;
+        const p = document.createElement('p');
+        p.className = "p";
+        p.style.left = `${xa + 15}px`;
+        p.style.top = `${ya + 35}px`;
+        p.innerText = weight[i - 1];
+        document.body.appendChild(p);
+    }
 }
 
-for(let i=1;i<=18;i++){
-    if(i%6!=0){
-        lineCreate(Node[i][0][0],Node[i][0][1],Node[i+1][0][0],Node[i+1][0][1])
+for (let i = 1; i <= 18; i++) {
+    if (i % 6 != 0) {
+        lineCreate(Node[i][0], Node[i][1], Node[i + 1][0], Node[i + 1][1]);
     }
-    if([1,5,3,12,10,8].includes(i)){
-        lineCreate(Node[i][0][0],Node[i][0][1],Node[i+6][0][0],Node[i+6][0][1])
+    if ([1, 5, 3, 12, 10, 8].includes(i)) {
+        lineCreate(Node[i][0], Node[i][1], Node[i + 6][0], Node[i + 6][1]);
     }
-    if(i%6==0){
-        lineCreate(Node[i][0][0],Node[i][0][1],Node[i-5][0][0],Node[i-5][0][1])
+    if (i % 6 == 0) {
+        lineCreate(Node[i][0], Node[i][1], Node[i - 5][0], Node[i - 5][1]);
     }
 }
+
 function lineCreate(x1, y1, x2, y2) {
     const line = document.createElement("div");
     const dx = x2 - x1;
     const dy = y2 - y1;
     const length = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx) * (180 / Math.PI); 
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
     line.style.position = "absolute";
-    line.style.left = `${x1+17}px`;
-    line.style.top = `${y1+70}px`;
-    line.style.width =` ${length}px`;
+    line.style.left = `${x1 + 17}px`;
+    line.style.top = `${y1 + 70}px`;
+    line.style.width = `${length}px`;
     line.style.height = "2px";
     line.style.backgroundColor = "black";
     line.style.transform = `rotate(${angle}deg)`;
     line.style.transformOrigin = "0 0";
-
     document.body.appendChild(line);
 }
+
 let scoredEdges = {};
 
 function updateScore() {
@@ -258,238 +267,253 @@ function updateScore() {
                 scoredEdges[key] = true;
             }
         }
-
     }
     score.Red = scoreRed;
     score.Blue = scoreBlue;
     renderScore();
 }
 
-function Unlock(){
-    if(!data.slice(13,19).includes(0)){
-        unlock[1]=1;
-    }else{
-        unlock[1]=0;
-    }
-    if(!data.slice(7,13).includes(0)){
-        unlock[0]=1;
-    }else{
-        unlock[0]=0;
-    }
-    if(!data.slice(1,7).includes(0)){
-        unlock[3]=1;
-    }else{
-        unlock[3]=0;
-    }
-}
-Unlock()
-function Move(a,b){
-    let o=0;
-    a=Number(a)
-    b=Number(b)
-    if((a==12 && b==18) || (a==18 && b==12)){
-      data[b]=data[a]
-      data[a]=0
-      o=1
-      lastMove = [data[b]==1? "R":"B" ,a,b]
-      removedItems = []; // Clear redo stack
-      moveHistory.push(lastMove)
-    }
-    else if(b%6==0){
-        if(a==b-5||a==b-1){
-            data[b]=data[a]
-            data[a]=0
-            o=1
-            lastMove = [data[b]==1? "R":"B" ,a,b]
-            removedItems = []; // Clear redo stack
-            moveHistory.push(lastMove)
-        }
-    }
-    else if(a%6==0){
-        if(a==b+1||a==b+5){
-            data[b]=data[a]
-            data[a]=0
-            o=1
-            lastMove = [data[b]==1? "R":"B" ,a,b]
-            removedItems = []; // Clear redo stack
-            moveHistory.push(lastMove)
-        }
-    }
-    else if([1,3,5,8,10,12].includes(a)){
-        if(a==b+1||a==b-1||a==b-6){
-            data[b]=data[a]
-            data[a]=0
-            o=1
-            lastMove = [data[b]==1? "R":"B" ,a,b]
-            removedItems = []; // Clear redo stack
-            moveHistory.push(lastMove)
-        }
-    }
-    else if([1,3,5,8,10,12].includes(b)){
-        if(a==b+1||a==b-1||a==b+6){
-            data[b]=data[a]
-            data[a]=0
-            o=1
-            lastMove = [data[b]==1? "R":"B" ,a,b]
-            removedItems = []; // Clear redo stack
-            moveHistory.push(lastMove)
-        }
-    }
-    else{
-        if(a==b+1||a==b-1){
-            data[b]=data[a]
-            data[a]=0
-            o=1
-            lastMove = [data[b]==1? "R":"B" ,a,b]
-            removedItems = []; // Clear redo stack
-            moveHistory.push(lastMove)
-        }
-    }
-    Change()
-    if(o==1){
-        
-        return true
-    }
-    else{
-        return false
-    }
+
+function Unlock() {
     
+    if (!data.slice(13, 19).includes(0) || !data.slice(7,13).includes(0)) {
+        unlock[1] = 1;
+    }else if(lastMove[1]==0 && lastMove[2]>=13 && !data.slice(7, 13).includes(0)){
+        unlock[1] = 0
+    }
 
+    }
+    if (!data.slice(7, 13).includes(0) || !data.slice(1,7).includes(0)) {
+        unlock[0] = 1;
+    }
+    if (!data.slice(1, 7).includes(0)) {
+        unlock[3] = 1;
+    } 
+
+Unlock();
+
+function Move(a, b) {
+    let o = 0;
+    a = Number(a);
+    b = Number(b);
+    console.log(`Moving from Node[${a}] = ${JSON.stringify(Node[a])} to Node[${b}] = ${JSON.stringify(Node[b])}`);
+
+    const performMove = () => {
+        data[b] = data[a];
+        data[a] = 0;
+        playMoveAudio();
+        o = 1;
+        lastMove = [data[b] == 1 ? "R" : "B", a, b];
+        removedItems = [];
+        moveHistory.push(lastMove);
+        console.log(`successfully moved from ${a} to ${b}`)
+        moveHighlight(Node[a], Node[b], data[b] == 1 ? "red" : "blue");
+        if (data[b] == 1) {
+            turn[0] = 0;
+            turn[1] = 1;
+            currentMove = "blue";
+        } else {
+            turn[0] = 1;
+            turn[1] = 0;
+            currentMove = "red";
+        }
+    };
+
+    if ((a == 12 && b == 18) || (a == 18 && b == 12)) {
+        performMove();
+    } else if (b % 6 == 0) {
+        if (a == b - 5 || a == b - 1) {
+            performMove();
+        }
+    } else if (a % 6 == 0) {
+        if (a == b + 1 || a == b + 5) {
+            performMove();
+        }
+    } else if ([1, 3, 5, 8, 10, 12].includes(a)) {
+        if (a == b + 1 || a == b - 1 || a == b - 6) {
+            performMove();
+        }
+    } else if ([1, 3, 5, 8, 10, 12].includes(b)) {
+        if (a == b + 1 || a == b - 1 || a == b + 6) {
+            performMove();
+        }
+    } else {
+        if (a == b + 1 || a == b - 1) {
+            performMove();
+        }
+    }
+
+    if (o === 1) {
+        Unlock();
+        updateScore();
+        renderScore();
+        startTimer();
+        return true;
+    } else {
+        playIllegalAudio();
+        return false;
+    }
 }
-function Change(){
+
+const hexContainer = document.getElementById("hex");
+const highlight = document.createElement('div');
+highlight.className = "highlight";
+hexContainer.appendChild(highlight);
+
+function moveHighlight(p, q, color, callback) {
+    const highlight = document.querySelector('.highlight');
+    const offset = 16;
+    highlight.style.transition = 'none';
+    highlight.style.left = `${p[0] + offset}px`;
+    highlight.style.top = `${p[1] + offset}px`;
+    highlight.style.opacity = '0';
+    highlight.style.backgroundColor = color;
+
+    void highlight.offsetWidth;
+
+    highlight.style.transition = 'left 0.5s ease-in-out, top 0.5s ease-in-out, opacity 0.5s ease-in-out';
+    highlight.style.left = `${q[0] + offset}px`;
+    highlight.style.top = `${q[1] + offset}px`;
+    highlight.style.opacity = '0.8';
+
+    setTimeout(() => {
+        highlight.style.transition = 'opacity 0.2s ease-in-out';
+        highlight.style.opacity = '0';
+        if (callback) callback(); 
+        Change();
+        setTimeout(() => {
+            highlight.style.transition = 'none';
+            highlight.style.left = '0px';
+            highlight.style.top = '0px';
+        }, 200);
+    }, 500);
+}
+
+function Change() {
     updateScore();
-    colorender()
-    Unlock()
-    if(unlock[3]==1){
-        if(score.Red>score.Blue){
-            alert("Red Wins")
-            location.reload()
-        }
-        else if(score.Red == score.Blue){
-            colorender()
-            alert("Match Drawn")
-            location.reload()
-        }
-        else{
-            alert("Blue Wins")
-            location.reload()
+    colorender();
+    Unlock();
+    if (unlock[3] == 1) {
+        if (score.Red > score.Blue) {
+            alert("Red Wins");
+            location.reload();
+        } else if (score.Red == score.Blue) {
+            colorender();
+            alert("Match Drawn");
+            location.reload();
+        } else {
+            alert("Blue Wins");
+            location.reload();
         }
     }
 }
 
-const turn=[1,0]//red-0,blue-1
-const move=[0,0]
-const titan=[4,4]
-function createTitan(id){
-    const button=document.getElementById(id)
-    button.style.backgroundColor=currentMove
-    if(currentMove=='red' ){
-        data[id]=1
-        lastMove = ["R",0,id]
+const turn = [1, 0]; // red-0, blue-1
+const move = [0, 0];
+const titan = [4, 4];
+
+function createTitan(id) {
+    const button = document.getElementById(id);
+    button.style.backgroundColor = currentMove;
+    if (currentMove == 'red') {
+        data[id] = 1;
+        lastMove = ["R", 0, id];
+        playCreateAudio();
     }
-    if(currentMove=='blue'){
-        data[id]=2
-        lastMove = ["B",0,id]
+    if (currentMove == 'blue') {
+        data[id] = 2;
+        lastMove = ["B", 0, id];
+        playCreateAudio();
     }
-    removedItems = []; // Clear redo stack
-    moveHistory.push(lastMove)
+    removedItems = [];
+    moveHistory.push(lastMove);
 }
 
-const alreadyClicked=[0,0]
-function moveTrack(event){
-    if(turn[0]==1){//red turn
-        if(data[event.target.value]==0&&unlock[Math.floor(event.target.value/6.1)]==1&&alreadyClicked[0]==0){
-            
-            if(titan[0]!=0){createTitan(event.target.value)
-                turn[0]=0
-            turn[1]=1
-            titan[0]-=1
-                currentMove = "blue";
-                startTimer();
-              }
-            
-        }
-        else if(data[event.target.value]==1){
-            if(alreadyClicked[0]==0){
-                alreadyClicked[0]=event.target.value
-                console.log(alreadyClicked[0])
-            }
-            
+const alreadyClicked = [0, 0];
 
-            
-        }
-        else if(data[event.target.value]==0&&unlock[Math.floor(event.target.value/6.1)]==1&&alreadyClicked[0]!=0){
-            if( Move(alreadyClicked[0],event.target.value)){
-                alreadyClicked[0]=0
-            console.log(`b-${event.target.value}`)
-                turn[0]=0
-            turn[1]=1
-            
-            currentMove = "blue"
-            startTimer();
-        }
-    else{
-        alreadyClicked[0]=0;
-        alreadyClicked[1]=0
-    }}
-        
-        
-    }
-    else if(turn[1]==1){//blue turn 1
-        if(data[event.target.value]==0&&unlock[Math.floor(event.target.value/6.1)]==1&&alreadyClicked[1]==0){
-            if(titan[1]!=0){
-                turn[0]=1
-            turn[1]=0
-            titan[1]-=1
-            createTitan(event.target.value)
-            currentMove = "red"
-            startTimer();
+function moveTrack(event) {
+    const id = Number(event.target.value);
+    const isRedTurn = turn[0] === 1;
+    const isBlueTurn = turn[1] === 1;
+    const unlocked = unlock[Math.floor(id / 6.1)] === 1;
+
+    if (isRedTurn) {
+        if (alreadyClicked[0] === 0) {
+            if (data[id] === 0 && unlocked) {
+                if (titan[0] <= 0) {
+                    playIllegalAudio();
+                } else if (id >= 1 && id <= 6 && unlock[3] === 1) {
+                    playIllegalAudio();
+                } else {
+                    createTitan(id);
+                    titan[0] -= 1;
+                    turn[0] = 0;
+                    turn[1] = 1;
+                    currentMove = "blue";
+                    alreadyClicked[0] = 0;
+                    startTimer();
+                    Change();
+                }
+            } else if (data[id] === 1) {
+                alreadyClicked[0] = id;
+            } else {
+                playIllegalAudio();
             }
-            
-        }
-        else if(data[event.target.value]==2){
-            
-            if(alreadyClicked[1]==0){
-                alreadyClicked[1]=event.target.value
-            
+        } else {
+            if (unlocked && Move(alreadyClicked[0], id)) {
+                alreadyClicked[0] = 0;
+            } else {
+                alreadyClicked[0] = 0;
+                playIllegalAudio();
             }
-            
         }
-        else if(data[event.target.value]==0&&unlock[Math.floor(event.target.value/6.1)]==1&&alreadyClicked[1]!=0){
-            if (Move(alreadyClicked[1],event.target.value)){
-                alreadyClicked[1]=0
-                turn[0]=1
-            turn[1]=0
-            
-            currentMove = "red"
-            startTimer();
+    } else if (isBlueTurn) {
+        if (alreadyClicked[1] === 0) {
+            if (data[id] === 0 && unlocked) {
+                if (titan[1] <= 0) {
+                    playIllegalAudio();
+                } else if (id >= 1 && id <= 6 && unlock[3] === 1) {
+                    playIllegalAudio();
+                } else {
+                    createTitan(id);
+                    titan[1] -= 1;
+                    turn[0] = 1;
+                    turn[1] = 0;
+                    currentMove = "red";
+                    alreadyClicked[1] = 0;
+                    startTimer();
+                    Change();
+                }
+            } else if (data[id] === 2) {
+                alreadyClicked[1] = id;
+            } else {
+                playIllegalAudio();
+            }
+        } else {
+            if (unlocked && Move(alreadyClicked[1], id)) {
+                alreadyClicked[1] = 0;
+            } else {
+                alreadyClicked[1] = 0;
+                playIllegalAudio();
+            }
         }
-        else{
-            alreadyClicked[0]=0;
-            alreadyClicked[1]=0
-        }}
-        
     }
-    else{
-        alreadyClicked[0]=0;
-        alreadyClicked[1]=0
-    }
-    Change()
+
+    renderScore();
 }
-function colorender(){
-    for(i=1;i<=18;i++){
-        const button=document.getElementById(i)
-        if(data[i]!=0){
-            if(data[i]==1){
-                button.style.backgroundColor='red'
+
+function colorender() {
+    for (i = 1; i <= 18; i++) {
+        const button = document.getElementById(i);
+        if (data[i] != 0) {
+            if (data[i] == 1) {
+                button.style.backgroundColor = 'red';
+            } else {
+                button.style.backgroundColor = 'blue';
             }
-            else{
-                button.style.backgroundColor='blue'
-            }
+        } else {
+            button.style.backgroundColor = '';
         }
-        else{
-            button.style.backgroundColor=''
-        }
-        console.log(button)
+        
     }
-  }
+}

@@ -7,27 +7,33 @@ body {
   background-color: #ecf0f1;
 }
 
-/* Main container */
 .main-container {
   display: flex;
   width: 100%;
+  flex-wrap: nowrap;
   position: relative;
 }
 
-/* Sidebar styling */
+
+
 .sidebar {
-  width: 200px;
+  width: 100%;
+  max-width: 300px;
+  position: fixed;
+  top: 0;
+  left: 0;
   background-color: #2c3e50;
   color: white;
   padding: 20px;
   height: 100vh;
-  z-index: 2;
+  z-index: 5;
   overflow: auto;
   transition: transform 0.3s ease;
+  transform: translateX(0);
 }
 
 .sidebar.collapsed {
-  transform: translateX(-200px);
+  transform: translateX(-100%);
 }
 
 .sidebar h2 {
@@ -54,18 +60,17 @@ body {
   text-decoration: underline;
 }
 
-/* Sidebar toggle button */
 .sidebar-toggle {
   position: fixed;
-  left: 220px;
-  top: 20px;
+  left: 320px;
+  top: 70px;
   background-color: #2c3e50;
   color: white;
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
-  z-index: 3;
+  z-index: 6;
   transition: left 0.3s ease;
 }
 
@@ -73,16 +78,19 @@ body {
   left: 20px;
 }
 
-/* Center content */
 .center-content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  overflow: auto;
+  position: relative;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-/* Move history panel */
 .move-history-panel {
   width: 250px;
   padding: 15px;
@@ -90,6 +98,42 @@ body {
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   height: 100vh;
   overflow-y: auto;
+}
+
+.sidebar:not(.collapsed) ~ .center-content,
+.sidebar:not(.collapsed) ~ .move-history-panel {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .move-history-panel {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  }
+  .sidebar {
+    max-width: 200px;
+  }
+  .sidebar-toggle {
+    left: 220px;
+  }
+  .sidebar-toggle.collapsed {
+    left: 20px;
+  }
+  .main-container {
+    flex-direction: column;
+  }
+  .center-content {
+    padding: 10px;
+  }
+  .move-history {
+    white-space: normal;
+    display: block;
+  }
 }
 
 .move-history-panel h3 {
@@ -100,36 +144,60 @@ body {
 }
 
 .move-history {
-  white-space: pre-wrap;
+  @media(width>=768px){
+    white-space: normal;
+    display: flex;
+    flex-direction: row;
+  }
 }
 
-/* Hex container */
+.red-move-history {
+  flex: 1;
+  padding: 5px;
+  color: red;
+  font-size: 15px;
+  display: block;
+}
+
+.blue-move-history {
+  flex: 1;
+  padding: 5px;
+  color: blue;
+  font-size: 15px;
+  display: block;
+}
+
 .hex-container {
   position: relative;
   flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  overflow: visible;
   z-index: 1;
-  margin-top: 60px;
 }
 
-/* Status bar */
 .status-bar {
   position: absolute;
-  top: 5px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 10px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 10px 20px;
+  flex-wrap: nowrap;
+  gap: 5px;
+  padding: 5px 10px;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   align-items: center;
-  width: 80%;
-  max-width: 800px;
+  width: fit-content;
+  max-width: 600px;
+  z-index: 3;
 }
 
 .status-bar button {
@@ -139,6 +207,8 @@ body {
   color: white;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 12px;
+  margin: 0;
 }
 
 .status-bar button:hover {
@@ -147,19 +217,22 @@ body {
 
 .timers {
   display: flex;
-  gap: 10px;
+  gap: 5px;
   font-weight: bold;
+  font-size: 14px;
 }
 
-.displayPlayerMove, .display-score {
+.displayPlayerMove,
+.display-score {
   font-weight: bold;
+  font-size: 14px;
+  margin: 0 5px;
 }
 
-/* Node styling */
 .node {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: clamp(20px, 4vw, 28px);
+  height: clamp(20px, 4vw, 28px);
   border-radius: 50%;
   background-color: #f8f9fa;
   border: 2px solid #ccc;
@@ -171,6 +244,7 @@ body {
   cursor: pointer;
   transition: transform 0.5s ease-in-out;
   z-index: 2;
+  font-size: clamp(10px, 2vw, 12px);
 }
 
 .node:hover {
@@ -180,8 +254,8 @@ body {
 
 .highlight {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: clamp(20px, 4vw, 28px);
+  height: clamp(20px, 4vw, 28px);
   border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
@@ -194,5 +268,18 @@ body {
 .p {
   position: absolute;
   color: #333;
-  font-size: 0.9;
+  font-size: clamp(8px, 1.5vw, 10px);
+  transform: translate(-50%, -50%);
 }
+
+.move-timer{
+  margin-left: 0px;
+  color: white;
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

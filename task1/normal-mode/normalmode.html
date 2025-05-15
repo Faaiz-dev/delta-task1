@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titan's Circuit Normal</title>
+  <link rel="stylesheet" href="normalmode-style.css">
+</head>
+<body>
+  <div class="main-container">
+    
+    <div class="sidebar" id="sidebar">
+      <h2>Game Modes</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="normalmode.html">Normal Mode</a></li>
+        <li><a href="../hackermode/hackermode.html">Hacker Mode</a></li>
+        <li><a href="../hackerppmode/hackerppmode.html">Hacker ++ Mode</a></li>
+
+      </ul>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebar-toggle">◀</button>
+
+  
+    <div class="center-content" id="center-content">
+      <div class="status-bar">
+        <button onclick="isResume()" id="pause-button" class="pause">Play</button>
+        <div class="net-timer">10:00</div>
+        <div class="display-score"></div>
+        <div class="red-titan-count"></div>
+        <div class="blue-titan-count"></div>
+        <button onclick="location.reload()">Reset</button>
+        <div class="move-timer"></div>
+      </div>
+      <div class="hex-container" id="hex"></div>
+    </div>
+  </div>
+  <script src="normalmode-script.js"></script>
+</body>
+</html>

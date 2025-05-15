@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titan's Circuit Hacker</title>
+  <link rel="stylesheet" href="hackermode-style.css">
+</head>
+<body>
+  <audio id="move" src="../src/move.mp3" preload="auto"></audio>
+  <audio id="create" src="../src/create.mp3" preload="auto"></audio>
+  <audio id="illegal" src="../src/illegal.mp3" preload="auto"></audio>
+  <audio id="eliminate" src="../src/capture.mp3" preload="auto"></audio>
+
+  <div class="main-container">
+    
+    <div class="sidebar" id="sidebar">
+      <h2>Game Modes</h2>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../normalmode/normalmode.html">Normal Mode</a></li>
+        <li><a href="hackermode.html">Hacker Mode</a></li>
+        <li><a href="../hackerppmode/hackerppmode.html">Hacker ++ Mode</a></li>
+
+      </ul>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebar-toggle">◀</button>
+
+  
+    <div class="center-content" id="center-content">
+      <div class="status-bar">
+        <button onclick="isResume()" id="pause-button" class="pause">Play</button>
+        <div class="overall-timer">10:00</div>
+        <div class="display-score"></div>
+        <div class="red-titan-count"></div>
+        <div class="blue-titan-count"></div>
+        <div class="move-timer"></div>
+      </div>
+      <div class="hex-container" id="hex"></div>
+      <div class="undo-redo">
+        <button class="undo-button" onclick="undo()"><img src="../src/undo.png"></button>
+        <button class="redo-button" onclick="redo()"><img src="../src/redo.png"></button>
+      </div>
+    </div>
+    
+    <div class="move-history-panel">
+      <h3>Move History</h3>
+      <div class="move-history">
+        <div class="red-move-history">red</div>
+        <div class="blue-move-history">blue</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="leaderboard-btn" id="leaderboard-btn"><img src="../src/trophy.png"></button>
+  <div class="overlay" id="overlay"></div>
+  <div class="leaderboard-modal" id="leaderboard-modal">
+    <button class="close-btn" id="close-btn">×</button>
+    <h2>LeaderBoard</h2>
+    <div class="leaderboard" >
+      <table class="table">
+          <tr  class="tr">
+            <th class="th">Rank</th>
+            <th class="th">Player</th>
+            <th class="th">Score</th>
+          </tr>
+        <tbody class="tbody">
+        </tbody>
+      </table>
+    </div>
+    </div>
+    </div>
+  </div>
+  <script src="hackermode-script.js"></script>
+</body>
+</html>
